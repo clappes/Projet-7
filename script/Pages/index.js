@@ -51,25 +51,14 @@ class App {
             }
         });
     }
-    removeFilteredTag(id, event) {
-        console.log("removeFilteredTag id", id)
-        const elementID = event.currentTarget.closest(".selected-choice").id
-        const idx = elementID.split('-')[1]
-        this.filteredTag = this.filteredTag.filter((d) => d.id != idx)
-        event.currentTarget.closest(".selected-choice").remove()
-        this.filter(filteredTag, recipes, filteredRecipes)
-
-    }
-
-    createFilteredTag(tag, cat, id) {
-        console.log("createFilteredTag id", id)
-        let $selectedTag = `<article id="id-${id}" data-filterCat="${cat}" class="selected-choice"><p>${tag}<i class="fa-solid fa-xmark"></i></p></article>`
-        document.querySelector('.filtre-selected').innerHTML += $selectedTag
-        console.log(document.querySelector(`#id-${id}`))
-        document.querySelector(`#id-${id} i`).addEventListener('click', (event) => {
-            this.removeFilteredTag(`id-${id}`, event)
-        })
-    }
+    // removeFilteredTag(id, event) {
+    //     console.log("removeFilteredTag id", id)
+    //     const elementID = event.currentTarget.closest(".selected-choice").id
+    //     const idx = elementID.split('-')[1]
+    //     this.filteredTag = this.filteredTag.filter((d) => d.id != idx)
+    //     event.currentTarget.closest(".selected-choice").remove()
+    //     this.filter(filteredTag, recipes, filteredRecipes)
+    // }
 
     filter(filteredTag, recipes, filteredRecipes) {
         filteredRecipes.length = 0
@@ -109,6 +98,15 @@ class App {
             )
         })
 
+
+        let deleteTag = document.createElement("i")
+        deleteTag.innerText = ""
+        deleteTag.className = "fa-solid fa-xmark"
+        deleteTag.addEventListener("click", (event) => {
+            event.currentTarget.closest(".selected-choice").remove()
+        })
+
+
         // filter
         const filtres = new Filters(recipes);
         this.ingredients = filtres.allIngredients;
@@ -132,9 +130,13 @@ class App {
                 const resultat = this.filteredTag.find((tag) => tag.name === selectedFilter);
                 if (resultat == undefined){
                     this.filteredTag.push({type:selectedCat, id:this.filteredTag.length+1, name:selectedFilter})
-                    this.createFilteredTag(selectedFilter, selectedCat, this.filteredTag.length)
+                    // this.createFilteredTag(selectedFilter, selectedCat, this.filteredTag.length)
+                    let newTag = new tagsVue(selectedFilter, selectedCat, this.filteredTag.length)
+                    document.querySelector('.filtre-selected').innerHTML += newTag.createFilterTag()
+                    document.querySelector(".tagname").closest('.selected-choice').appendChild(deleteTag)
                     this.filter(this.filteredTag, recipes, this.filteredRecipes)
                 }
+                
                 this.$recipeWrapper.innerHTML = ""
                 this.filteredRecipes.forEach(recipe => {
                     var template = new recipeCard(recipe)
@@ -142,36 +144,6 @@ class App {
                         template.createRecipeCard()
                     )
                 })
-                
-                // recipes.forEach(recipe => {
-                //     for(let i = 0; i <this.filteredTag.length; i++){
-                //         if (recipe.ustensils.indexOf(selectedFilter) != -1) {
-                //             this.filteredRecipes.push(recipe);
-                //             console.log(this.filteredRecipes)
-                //             this.$recipeWrapper.innerHTML = ""
-                //             this.filteredRecipes.forEach(recipe => {
-                //                 const galery = new recipeCard(recipe)
-                //                 this.$recipeWrapper.appendChild(galery.createRecipeCard())
-                //             })
-                //         }
-                //     }
-                    
-                // })
-                // if(this.filteredTag.length > 1){
-                //     this.filteredRecipes.forEach(recipe => {
-                //         if (recipe.ustensils.indexOf(selectedFilter) != -1) {
-                //             this.filteredRecipes.length = 0
-                //             console.log(this.filteredrecipes)
-                //             this.filteredRecipes.push(recipe);
-                //             console.log(this.filteredrecipes)
-                //             this.$recipeWrapper.innerHTML = ""
-                //             this.filteredRecipes.forEach(recipe => {
-                //                 const galery = new recipeCard(recipe)
-                //                 this.$recipeWrapper.appendChild(galery.createRecipeCard())
-                //             })
-                //         }
-                //     })
-                // }
             })    
             })
         this.dropdown()
