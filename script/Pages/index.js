@@ -52,25 +52,8 @@ class App {
             }
         });
     }
-
-    // filter(filteredTag, recipes, filteredRecipesByTags) {
-    //     filteredRecipesByTags.length = 0
-    //     for(let indexAllRecipes = 0; indexAllRecipes < recipes.length; indexAllRecipes++){
-    //       let recipeHasAllUstensils = true;
-    //       for(let indexUstensils = 0; indexUstensils < filteredTag.length; indexUstensils++){
-    //         if (!recipes[indexAllRecipes].ustensils.includes(filteredTag[indexUstensils].name)) {
-    //           recipeHasAllUstensils = false;
-    //           break;
-    //         }
-    //       }
-    //       if (recipeHasAllUstensils) {
-    //         filteredRecipesByTags.push(recipes[indexAllRecipes]);
-    //       }
-    //     }
-    // }
     eventListenerOnTags(recipes){
         this.$filterWrapper.querySelectorAll('.dropdown-item').forEach( $item => {
-            console.log("test")
             $item.addEventListener('click', e => {
                 
                 let selectedCat = e.target.getAttribute('data-belong')
@@ -91,7 +74,6 @@ class App {
             this.mainSearch(filterInput.value, recipes, this.filteredTag)
         })
     }
-
     buildRecettesDOM(recipes, $recipeWrapper){
         this.$recipeWrapper.innerHTML = ""
         recipes.forEach(recipe => {
@@ -101,14 +83,12 @@ class App {
             )
         })
     }
-
     mainSearch(searchText, recipes, filteredTags) {
-        console.log("searchtext",searchText)
-        console.log("filteredTags",filteredTags)
         let result = this.searchByText(searchText, recipes)
         result = this.searchByTags(filteredTags, result)
         this.buildRecettesDOM(result, this.$recipeWrapper)
         this.buildTags(result)
+        this.buildNumberRecipe(result)
     }
     searchByText(searchText, recipes) {
         if(searchText.length >= 3 ){
@@ -121,13 +101,10 @@ class App {
                     recipe.ustensils.toString().toLowerCase().includes(searchText)
             )
         }
-        console.log(recipes)
-
         if(recipes.length === 0){
             alert("Aucune recette avec cette recherche");
             return recipes
         } else {
-            console.log(recipes)
             return recipes
         }
         
@@ -169,9 +146,20 @@ class App {
 
         this.eventListenerOnTags(result)
     }  
-
-    // updateRecipes(){}
-
+    removeTag(tag, recipes){
+        const elementID = tag.id
+        const idx = elementID.split('-')[1]
+        this.filteredTag = this.filteredTag.filter((d) => d.id != idx)
+        tag.remove()
+        this.mainSearch(this.inputSearch, recipes, this.filteredTag)
+    }
+    buildNumberRecipe(result){
+        const numberwrapper = document.querySelector(".recipeNumber")
+        numberwrapper.innerHTML = result.length + " recettes"
+        if(result.length === 1){
+            numberwrapper.innerHTML = result.length + " recette"
+        }
+    }
     async main() {
 
         const recipeData = await this.recipeApi.getRecipe()
@@ -181,7 +169,6 @@ class App {
         const filterSupp = document.querySelector('.supp')
 
         this.buildRecettesDOM( recipes, this.$recipeWrapper)
-        // filter
         this.buildTags(recipes)
 
 
@@ -203,10 +190,12 @@ class App {
         })
 
         // EventListener for RemoveTags
-        // deleteTag.addEventListener('click', (event) => {
-        //     this.removeTags(tag)
-        //     this.mainSearch(this.inputSearch, recipes, this.filteredTag)
-        // })
+        document.querySelector(".filtre-selected").addEventListener('click', (event) => {
+            if(event.target.classList.contains('fa-xmark')){
+                this.removeTag(event.target.closest(".selected-choice"), recipes)
+                this.mainSearch(this.inputSearch, recipes, this.filteredTag)
+            }
+        })
     }
     
 
