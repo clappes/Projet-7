@@ -3,29 +3,6 @@ class filterVueCard {
         this.filters = arrayOfFilter;
         this.type = type;
     }
-
-    searchFilterIngredient(){
-        let searchInputIngredient = document.querySelector('[data-filter="ingredients"] .form-control');
-        let filterList = document.querySelectorAll('[data-belong="ingredients"].dropdown-item')
-        let finalFilterList = []
-        console.log(filterList)
-
-        searchInputIngredient.addEventListener("input", (event) => {
-            if(event.target.value.length >= 1){
-                finalFilterList = Object.values(filterList).filter( 
-                    (filter) => {
-                        console.log(filter)
-                        const filterSelected = filter.innerText.toLowerCase().includes(event.target.value)
-                        return filterSelected
-                    }
-                        
-                )
-                console.log(finalFilterList)
-            }
-        })
-        filterList.innerHTML = ""
-        filterList.innerHTML = finalFilterList
-    }
     // searchFilterUstensils(){
     //     let searchInput = document.querySelector('.form-control');
     //     let filterList = document.querySelectorAll('.dropdown-item');

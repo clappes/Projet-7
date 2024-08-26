@@ -137,7 +137,7 @@ class App {
         this.ingredients = filtres.allIngredients
         let $allIngredients = new filterVueCard(this.ingredients, "Ingrédients")
         this.$filterWrapper.querySelector('#ingredients').innerHTML = $allIngredients.createFilterVueCard()
-        $allIngredients.searchFilterIngredient()
+        this.searchFilterIngredient()
 
         this.appliances = filtres.allAppliances
         let $allAppliances = new filterVueCard(this.appliances , "Appareils")
@@ -163,6 +163,25 @@ class App {
         if(result.length === 1){
             numberwrapper.innerHTML = result.length + " recette"
         }
+    }
+    searchFilterIngredient(){
+        let searchInputIngredient = document.querySelector('[data-filter="ingredients"] .form-control');
+        searchInputIngredient.addEventListener("input", (event) => {
+            if(event.target.value.length >= 1){
+                document.querySelectorAll('ul[data-filter="ingredients"] li').forEach(e => e.remove())
+                this.ingredients.filter((filter) => filter.toLowerCase().includes(event.target.value.toLowerCase()))
+                .forEach(item => {
+                        const $li = document.createElement("li")
+                        const $a = document.createElement("a")
+                        $a.classList.add("dropdown-item")
+                        $a.setAttribute("data-belong", "ingredients")
+                        $a.setAttribute("href", "#")
+                        $a.textContent = item
+                        $li.appendChild($a)
+                        document.querySelector('ul[data-filter="ingredients"]').appendChild($li)
+                })
+            }
+        })
     }
     async main() {
 
