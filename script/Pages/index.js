@@ -91,26 +91,28 @@ class App {
         this.buildNumberRecipe(result)
     }
     searchByText(searchText, recipes) {
+        let result = []
         if(searchText.length >= 3 ){
-            recipes = recipes.filter (
-                (recipe) =>
-                    recipe.name.toLowerCase().includes(searchText) ||
-                    recipe.description.toLowerCase().includes(searchText) ||
-                    recipe.ingredients.map((ingredients) => ingredients.ingredient).toString().toLowerCase().includes(searchText) ||
-                    recipe.appliance.toLowerCase().includes(searchText) ||
-                    recipe.ustensils.toString().toLowerCase().includes(searchText)
-            )
-        }
-        if(recipes.length === 0){
-            alert("Aucune recette avec cette recherche");
-            return recipes
+            for(let i=0; i < recipes.length; i++) {
+                let recipeIngredient = []
+                for (const idx in recipes[i].ingredients) {
+                    console.log(recipes[i].ingredients[idx])
+                    recipeIngredient.push(recipes[i].ingredients[idx].ingredient.toLowerCase())
+                }
+                if(recipes[i].name.toLowerCase().includes(searchText) || recipes[i].description.toLowerCase().includes(searchText) || recipeIngredient.includes(searchText) || recipes[i].appliance.toLowerCase().includes(searchText) || recipes[i].ustensils.toString().toLowerCase().includes(searchText)) {
+                    result.push(recipes[i])
+                }
+            }
+            if(result.length === 0) {
+                alert("Aucune recette avec cette recherche");
+            }
+            return result
         } else {
             return recipes
         }
         
     }
     searchByTags(filteredTags, result){  
-        // let finalRecipeFiltered = new Set();
 
         if(filteredTags.length >= 1 ){
             for(let index = 0; index < filteredTags.length; index++){
@@ -131,19 +133,21 @@ class App {
     
     }
     buildTags(result){
-        const filtres = new Filters(result);
-        this.ingredients = filtres.allIngredients;
-        let $allIngredients = new filterVueCard(this.ingredients, "Ingrédients");
-        this.$filterWrapper.querySelector('#ingredients').innerHTML = $allIngredients.createFilterVueCard();
+        const filtres = new Filters(result)
+        this.ingredients = filtres.allIngredients
+        let $allIngredients = new filterVueCard(this.ingredients, "Ingrédients")
+        this.$filterWrapper.querySelector('#ingredients').innerHTML = $allIngredients.createFilterVueCard()
+        $allIngredients.searchFilterIngredient()
 
-        this.appliances = filtres.allAppliances;
-        let $allAppliances = new filterVueCard(this.appliances , "Appareils");
-        this.$filterWrapper.querySelector('#appliances').innerHTML = $allAppliances.createFilterVueCard();
-    
-        this.ustensils = filtres.allUstensils;
-        let $allUstensils = new filterVueCard(this.ustensils, "Ustensiles");
-        this.$filterWrapper.querySelector('#ustensils').innerHTML = $allUstensils.createFilterVueCard();
+        this.appliances = filtres.allAppliances
+        let $allAppliances = new filterVueCard(this.appliances , "Appareils")
+        this.$filterWrapper.querySelector('#appliances').innerHTML = $allAppliances.createFilterVueCard()
+        // $allAppliances.searchFilterAppliances()
 
+        this.ustensils = filtres.allUstensils
+        let $allUstensils = new filterVueCard(this.ustensils, "Ustensiles")
+        this.$filterWrapper.querySelector('#ustensils').innerHTML = $allUstensils.createFilterVueCard()
+        // $allUstensils.searchFilterUstensils()
         this.eventListenerOnTags(result)
     }  
     removeTag(tag, recipes){
