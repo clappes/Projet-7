@@ -84,7 +84,7 @@ class App {
     //     })
     // }
       
-
+    
     async main() {
 
         const recipeData = await this.recipeApi.getRecipe()
