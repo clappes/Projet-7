@@ -237,8 +237,6 @@ class App {
         // EventListener for tags
         this.eventListenerOnTags(recipes)
 
-
-
         // EventListener for searchBar supp
         filterSupp.addEventListener('click', (event) => {
             this.removeSearchInputValue(filterInput, filterSupp, recipes)
