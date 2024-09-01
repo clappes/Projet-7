@@ -20,6 +20,7 @@ class filterVueCard {
             break;
 
         } 
+
         this.filters.forEach((filter) => {
             options += `<li><a data-belong="${typeOfFilter}" class="dropdown-item" href="#">${filter}</a></li>`
         });

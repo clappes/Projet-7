@@ -1,0 +1,79 @@
+filteredRecipesIds.length = 0;
+
+        filterInput.addEventListener('input', (event) => {
+            let searchText = this.normalizeElement(event.target.value)
+            
+            if(searchText.length < 3){
+                this.$recipeWrapper.innerHTML = ""
+                this.displayRecipes(recipes,this.$recipeWrapper)
+            }
+            else {
+
+                let matchingRecipes = recipes.filter(recipe => recipe.name.toLowerCase().includes(searchText))
+                // console.log(filteredRecipesBySearch)
+                filteredRecipesBySearch.push(recipe)
+                // matchingRecipes.forEach(recipe => {
+                //     if(filteredRecipesIds.indexOf(recipe.id) === -1) {
+                //         filteredRecipesIds.push(recipe.id)
+                        
+                //     }
+                // })
+            }
+            // console.log(filteredRecipesBySearch)
+            this.$recipeWrapper.innerHTML = ""
+            this.displayRecipes(filteredRecipesBySearch, this.$recipeWrapper)
+	})
+
+
+	const filteredRecipesIds = [];
+
+        // Generation recipe
+        this.displayRecipes(recipes, this.$recipeWrapper)
+
+
+        let deleteTag = document.createElement("i")
+        deleteTag.innerText = ""
+        deleteTag.className = "fa-solid fa-xmark"
+        deleteTag.addEventListener("click", (event) => {
+            event.currentTarget.closest(".selected-choice").remove()
+        })
+
+
+        // filter
+        const filtres = new Filters(recipes);
+        this.ingredients = filtres.allIngredients;
+        let $allIngredients = new filterVueCard(this.ingredients, "Ingrédients");
+        this.$filterWrapper.querySelector('#ingredients').innerHTML = $allIngredients.createFilterVueCard();
+
+        this.appliances = filtres.allAppliances;
+        let $allAppliances = new filterVueCard(this.appliances , "Appareils");
+        this.$filterWrapper.querySelector('#appliances').innerHTML = $allAppliances.createFilterVueCard();
+    
+        this.ustensils = filtres.allUstensils;
+        let $allUstensils = new filterVueCard(this.ustensils, "Ustensiles");
+        this.$filterWrapper.querySelector('#ustensils').innerHTML = $allUstensils.createFilterVueCard();
+
+
+
+        // filtered TAG
+        this.$filterWrapper.querySelectorAll('.dropdown-item').forEach( $item => {
+            $item.addEventListener('click', e => {
+                let selectedCat = e.target.getAttribute('data-belong')
+                let selectedFilter = e.target.textContent
+                const resultat = this.filteredTag.find((tag) => tag.name === selectedFilter);
+                if (resultat == undefined){
+                    this.filteredTag.push({type:selectedCat, id:this.filteredTag.length+1, name:selectedFilter})
+                    let newTag = new tagsVue(selectedFilter, selectedCat, this.filteredTag.length)
+                    document.querySelector('.filtre-selected').innerHTML += newTag.createFilterTag()
+
+                    // newTag.appendChild(deleteTag)
+                    this.filter(this.filteredTag, recipes, this.filteredRecipesByTags)
+                }
+                this.$recipeWrapper.innerHTML = ""
+                this.displayRecipes(this.filteredRecipesByTags, this.$recipeWrapper)
+            })    
+            })
+        this.dropdown()
+        this.mainSearch(filterInput, this.filteredRecipesBySearch, recipes, filteredRecipesIds)
+        this.removeSearchInputValue(filterInput, filterSupp, recipes)
+

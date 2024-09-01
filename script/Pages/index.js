@@ -6,7 +6,8 @@ class App {
         this.$filteredWrapper = document.querySelector('.filtre-selected')
         this.recipeApi = new RecipeApi('../data/recipes.json')
         this.filteredTag= []
-        this.filteredRecipes = []
+        this.result = []
+        this.inputSearch= ""
         this.ingredients
         this.appliances
         this.ustensils
@@ -51,67 +52,88 @@ class App {
             }
         });
     }
-    // removeFilteredTag(id, event) {
-    //     console.log("removeFilteredTag id", id)
-    //     const elementID = event.currentTarget.closest(".selected-choice").id
-    //     const idx = elementID.split('-')[1]
-    //     this.filteredTag = this.filteredTag.filter((d) => d.id != idx)
-    //     event.currentTarget.closest(".selected-choice").remove()
-    //     this.filter(filteredTag, recipes, filteredRecipes)
-    // }
-
-    filter(filteredTag, recipes, filteredRecipes) {
-        filteredRecipes.length = 0
-        for(let indexAllRecipes = 0; indexAllRecipes < recipes.length; indexAllRecipes++){
-          let recipeHasAllUstensils = true;
-          for(let indexUstensils = 0; indexUstensils < filteredTag.length; indexUstensils++){
-            if (!recipes[indexAllRecipes].ustensils.includes(filteredTag[indexUstensils].name)) {
-              recipeHasAllUstensils = false;
-              break;
-            }
-          }
-          if (recipeHasAllUstensils) {
-            filteredRecipes.push(recipes[indexAllRecipes]);
-          }
-        }
+    eventListenerOnTags(recipes){
+        this.$filterWrapper.querySelectorAll('.dropdown-item').forEach( $item => {
+            $item.addEventListener('click', e => {
+                
+                let selectedCat = e.target.getAttribute('data-belong')
+                let selectedFilter = e.target.textContent
+                const resultat = this.filteredTag.find((tag) => tag.name === selectedFilter);
+                if (resultat == undefined){
+                    this.filteredTag.push({type:selectedCat, id:this.filteredTag.length+1, name:selectedFilter})
+                    let newTag = new tagsVue(selectedFilter, selectedCat, this.filteredTag.length)
+                    document.querySelector('.filtre-selected').innerHTML += newTag.createFilterTag()
+                }
+                this.mainSearch(this.inputSearch, recipes, this.filteredTag)
+            })    
+        })
     }
-    // displayFilteredRecipes(filteredRecipes, $recipeWrapper) {
-    //     filteredRecipes.forEach(recipe => {
-    //         var Template = new recipeCard(recipe)
-    //         $recipeWrapper.appendChild(
-    //             Template.createRecipeCard()
-    //         )
-    //     })
-    // }
-      
-    
-    async main() {
-
-        const recipeData = await this.recipeApi.getRecipe()
-        const recipes = recipeData.map(recipe => new Recipe(recipe))
-
-        // Generation recipe
+    removeSearchInputValue(filterInput, filterSupp, recipes){
+        filterSupp.addEventListener('click', ()=> {
+            filterInput.value = '';
+            this.mainSearch(filterInput.value, recipes, this.filteredTag)
+        })
+    }
+    buildRecettesDOM(recipes, $recipeWrapper){
+        this.$recipeWrapper.innerHTML = ""
         recipes.forEach(recipe => {
             var Template = new recipeCard(recipe)
-            this.$recipeWrapper.appendChild(
+            $recipeWrapper.appendChild(
                 Template.createRecipeCard()
             )
         })
+    }
+    mainSearch(searchText, recipes, filteredTags) {
+        let result = this.searchByText(searchText, recipes)
+        result = this.searchByTags(filteredTags, result)
+        this.buildRecettesDOM(result, this.$recipeWrapper)
+        this.buildTags(result)
+        this.buildNumberRecipe(result)
+    }
+    searchByText(searchText, recipes) {
+        if(searchText.length >= 3 ){
+            recipes = recipes.filter (
+                (recipe) =>
+                    recipe.name.toLowerCase().includes(searchText) ||
+                    recipe.description.toLowerCase().includes(searchText) ||
+                    recipe.ingredients.map((ingredients) => ingredients.ingredient).toString().toLowerCase().includes(searchText) ||
+                    recipe.appliance.toLowerCase().includes(searchText) ||
+                    recipe.ustensils.toString().toLowerCase().includes(searchText)
+            )
+        }
+        if(recipes.length === 0){
+            alert("Aucune recette avec cette recherche");
+            return recipes
+        } else {
+            return recipes
+        }
+        
+    }
+    searchByTags(filteredTags, result){  
+        if(filteredTags.length >= 1 ){
+            for(let index = 0; index < filteredTags.length; index++){
+                result = result.filter (
+                    (recipe) => {
 
-
-        let deleteTag = document.createElement("i")
-        deleteTag.innerText = ""
-        deleteTag.className = "fa-solid fa-xmark"
-        deleteTag.addEventListener("click", (event) => {
-            event.currentTarget.closest(".selected-choice").remove()
-        })
-
-
-        // filter
-        const filtres = new Filters(recipes);
-        this.ingredients = filtres.allIngredients;
-        let $allIngredients = new filterVueCard(this.ingredients, "Ingrédients");
-        this.$filterWrapper.querySelector('#ingredients').innerHTML = $allIngredients.createFilterVueCard();
+                        const tagsName = filteredTags[index].name.toLowerCase()
+                        const searchMatchByIngredients = recipe.ingredients.map((ingredients) => ingredients.ingredient).toString().toLowerCase().includes(tagsName)
+                        const searchMatchByAppliance = recipe.appliance.toLowerCase().includes(tagsName)
+                        const searchMatchByUstensils = recipe.ustensils.toString().toLowerCase().includes(tagsName)
+                        return searchMatchByIngredients  || searchMatchByAppliance || searchMatchByUstensils
+                    }
+                )
+            }
+            
+        }
+        return result
+    
+    }
+    buildTags(result){
+        const filtres = new Filters(result)
+        this.ingredients = filtres.allIngredients
+        let $allIngredients = new filterVueCard(this.ingredients, "Ingrédients")
+        this.$filterWrapper.querySelector('#ingredients').innerHTML = $allIngredients.createFilterVueCard()
+        this.searchFilterIngredient()
 
         this.appliances = filtres.allAppliances;
         let $allAppliances = new filterVueCard(this.appliances , "Appareils");
@@ -232,7 +254,6 @@ class App {
 }
 
 const app = new App()
-
 app.main()
 
 

@@ -6,7 +6,7 @@ class tagsVue {
     }
     createFilterTag() {
        return `
-                        <article id="id-${this.id}" data-filterCat="${this.type}" class="selected-choice"><p class="tagname">${this.name}</p></article>
+                        <article id="id-${this.id}" data-filterCat="${this.type}" class="selected-choice"><p class="tagname">${this.name}</p><i class="fa-solid fa-xmark"></i></article>
         `
     }
 }

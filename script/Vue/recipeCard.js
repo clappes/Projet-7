@@ -44,6 +44,7 @@ class recipeCard {
         </div>
         
         `
+        
         $wrapper.innerHTML = recipeCard
         return $wrapper
     }
