@@ -142,12 +142,13 @@ class App {
         this.appliances = filtres.allAppliances
         let $allAppliances = new filterVueCard(this.appliances , "Appareils")
         this.$filterWrapper.querySelector('#appliances').innerHTML = $allAppliances.createFilterVueCard()
-        // $allAppliances.searchFilterAppliances()
+        this.searchFilterAppliances()
 
         this.ustensils = filtres.allUstensils
         let $allUstensils = new filterVueCard(this.ustensils, "Ustensiles")
         this.$filterWrapper.querySelector('#ustensils').innerHTML = $allUstensils.createFilterVueCard()
-        // $allUstensils.searchFilterUstensils()
+        this.searchFilterUstensiles()
+
         this.eventListenerOnTags(result)
     }  
     removeTag(tag, recipes){
@@ -167,7 +168,6 @@ class App {
     searchFilterIngredient(){
         let searchInputIngredient = document.querySelector('[data-filter="ingredients"] .form-control');
         searchInputIngredient.addEventListener("input", (event) => {
-            if(event.target.value.length >= 1){
                 document.querySelectorAll('ul[data-filter="ingredients"] li').forEach(e => e.remove())
                 this.ingredients.filter((filter) => filter.toLowerCase().includes(event.target.value.toLowerCase()))
                 .forEach(item => {
@@ -180,7 +180,40 @@ class App {
                         $li.appendChild($a)
                         document.querySelector('ul[data-filter="ingredients"]').appendChild($li)
                 })
-            }
+        })
+    }
+    searchFilterAppliances(){
+        let searchInputAppliances = document.querySelector('[data-filter="appareils"] .form-control');
+        searchInputAppliances.addEventListener("input", (event) => {
+                document.querySelectorAll('ul[data-filter="appareils"] li').forEach(e => e.remove())
+                this.appliances.filter((filter) => filter.toLowerCase().includes(event.target.value.toLowerCase()))
+                .forEach(item => {
+                        const $li = document.createElement("li")
+                        const $a = document.createElement("a")
+                        $a.classList.add("dropdown-item")
+                        $a.setAttribute("data-belong", "appareils")
+                        $a.setAttribute("href", "#")
+                        $a.textContent = item
+                        $li.appendChild($a)
+                        document.querySelector('ul[data-filter="appareils"]').appendChild($li)
+                })
+        })
+    }
+    searchFilterUstensiles(){
+        let searchInputUstensiles = document.querySelector('[data-filter="ustensiles"] .form-control');
+        searchInputUstensiles.addEventListener("input", (event) => {
+                document.querySelectorAll('ul[data-filter="ustensiles"] li').forEach(e => e.remove())
+                this.ustensils.filter((filter) => filter.toLowerCase().includes(event.target.value.toLowerCase()))
+                .forEach(item => {
+                        const $li = document.createElement("li")
+                        const $a = document.createElement("a")
+                        $a.classList.add("dropdown-item")
+                        $a.setAttribute("data-belong", "ustensiles")
+                        $a.setAttribute("href", "#")
+                        $a.textContent = item
+                        $li.appendChild($a)
+                        document.querySelector('ul[data-filter="ustensiles"]').appendChild($li)
+                })
         })
     }
     async main() {
