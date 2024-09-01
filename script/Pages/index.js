@@ -116,38 +116,116 @@ class App {
         this.appliances = filtres.allAppliances;
         let $allAppliances = new filterVueCard(this.appliances , "Appareils");
         this.$filterWrapper.querySelector('#appliances').innerHTML = $allAppliances.createFilterVueCard();
+        this.searchFilterAppliances()
     
         this.ustensils = filtres.allUstensils;
         let $allUstensils = new filterVueCard(this.ustensils, "Ustensiles");
         this.$filterWrapper.querySelector('#ustensils').innerHTML = $allUstensils.createFilterVueCard();
+        this.searchFilterUstensiles()
 
-        // filtered TAG
-        
-        this.$filterWrapper.querySelectorAll('.dropdown-item').forEach( $item => {
-            $item.addEventListener('click', e => {
-                let selectedCat = e.target.getAttribute('data-belong')
-                let selectedFilter = e.target.textContent
-                const resultat = this.filteredTag.find((tag) => tag.name === selectedFilter);
-                if (resultat == undefined){
-                    this.filteredTag.push({type:selectedCat, id:this.filteredTag.length+1, name:selectedFilter})
-                    // this.createFilteredTag(selectedFilter, selectedCat, this.filteredTag.length)
-                    let newTag = new tagsVue(selectedFilter, selectedCat, this.filteredTag.length)
-                    document.querySelector('.filtre-selected').innerHTML += newTag.createFilterTag()
-                    document.querySelector(".tagname").closest('.selected-choice').appendChild(deleteTag)
-                    this.filter(this.filteredTag, recipes, this.filteredRecipes)
-                }
-                
-                this.$recipeWrapper.innerHTML = ""
-                this.filteredRecipes.forEach(recipe => {
-                    var template = new recipeCard(recipe)
-                    this.$recipeWrapper.appendChild(
-                        template.createRecipeCard()
-                    )
+        this.eventListenerOnTags(result)
+    }  
+    removeTag(tag, recipes){
+        const elementID = tag.id
+        const idx = elementID.split('-')[1]
+        this.filteredTag = this.filteredTag.filter((d) => d.id != idx)
+        tag.remove()
+        this.mainSearch(this.inputSearch, recipes, this.filteredTag)
+    }
+    buildNumberRecipe(result){
+        const numberwrapper = document.querySelector(".recipeNumber")
+        numberwrapper.innerHTML = result.length + " recettes"
+        if(result.length === 1){
+            numberwrapper.innerHTML = result.length + " recette"
+        }
+    }
+    searchFilterIngredient(){
+        let searchInputIngredient = document.querySelector('[data-filter="ingredients"] .form-control');
+        searchInputIngredient.addEventListener("input", (event) => {
+                document.querySelectorAll('ul[data-filter="ingredients"] li').forEach(e => e.remove())
+                this.ingredients.filter((filter) => filter.toLowerCase().includes(event.target.value.toLowerCase()))
+                .forEach(item => {
+                        const $li = document.createElement("li")
+                        const $a = document.createElement("a")
+                        $a.classList.add("dropdown-item")
+                        $a.setAttribute("data-belong", "ingredients")
+                        $a.setAttribute("href", "#")
+                        $a.textContent = item
+                        $li.appendChild($a)
+                        document.querySelector('ul[data-filter="ingredients"]').appendChild($li)
                 })
-            })    
-            })
-        this.dropdown()
+        })
+    }
+    searchFilterAppliances(){
+        let searchInputAppliances = document.querySelector('[data-filter="appareils"] .form-control');
+        searchInputAppliances.addEventListener("input", (event) => {
+                document.querySelectorAll('ul[data-filter="appareils"] li').forEach(e => e.remove())
+                this.appliances.filter((filter) => filter.toLowerCase().includes(event.target.value.toLowerCase()))
+                .forEach(item => {
+                        const $li = document.createElement("li")
+                        const $a = document.createElement("a")
+                        $a.classList.add("dropdown-item")
+                        $a.setAttribute("data-belong", "appareils")
+                        $a.setAttribute("href", "#")
+                        $a.textContent = item
+                        $li.appendChild($a)
+                        document.querySelector('ul[data-filter="appareils"]').appendChild($li)
+                })
+        })
+    }
+    searchFilterUstensiles(){
+        let searchInputUstensiles = document.querySelector('[data-filter="ustensiles"] .form-control');
+        searchInputUstensiles.addEventListener("input", (event) => {
+                document.querySelectorAll('ul[data-filter="ustensiles"] li').forEach(e => e.remove())
+                this.ustensils.filter((filter) => filter.toLowerCase().includes(event.target.value.toLowerCase()))
+                .forEach(item => {
+                        const $li = document.createElement("li")
+                        const $a = document.createElement("a")
+                        $a.classList.add("dropdown-item")
+                        $a.setAttribute("data-belong", "ustensiles")
+                        $a.setAttribute("href", "#")
+                        $a.textContent = item
+                        $li.appendChild($a)
+                        document.querySelector('ul[data-filter="ustensiles"]').appendChild($li)
+                })
+        })
+    }
+    async main() {
 
+        const recipeData = await this.recipeApi.getRecipe()
+        const recipes = recipeData.map(recipe => new Recipe(recipe))
+
+        const filterInput = document.querySelector('#search')
+        const filterSupp = document.querySelector('.supp')
+
+        this.buildRecettesDOM( recipes, this.$recipeWrapper)
+        this.buildTags(recipes)
+
+
+        // EventListener for searchBar
+        filterInput.addEventListener('input', (event) => {
+            this.inputSearch = event.target.value
+            this.mainSearch(this.inputSearch, recipes, this.filteredTag)
+        })
+
+        // EventListener for tags
+        this.eventListenerOnTags(recipes)
+
+
+
+        // EventListener for searchBar supp
+        filterSupp.addEventListener('click', (event) => {
+            this.removeSearchInputValue(filterInput, filterSupp, recipes)
+            this.mainSearch(this.inputSearch, recipes, this.filteredTag)
+        })
+
+        // EventListener for RemoveTags
+        document.querySelector(".filtre-selected").addEventListener('click', (event) => {
+            if(event.target.classList.contains('fa-xmark')){
+                this.removeTag(event.target.closest(".selected-choice"), recipes)
+                this.mainSearch(this.inputSearch, recipes, this.filteredTag)
+            }
+        })
     }
     
 
